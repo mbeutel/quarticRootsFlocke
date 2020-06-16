@@ -13,7 +13,9 @@ cmake_minimum_required(VERSION 3.5)
 
 SET( TARGET Quartic )
 
-PROJECT( ${TARGET} CXX C )
+PROJECT( ${TARGET}
+         LANGUAGES CXX
+         VERSION 1.0.0 )
 
 FILE( GLOB S ./CMakeLists-cflags.txt )
 IF( EXISTS ${S} )
@@ -55,9 +57,13 @@ FOREACH (F ${S})
   LIST( APPEND HEADERS ${RF} )
 ENDFOREACH (F ${S})
 
-INCLUDE_DIRECTORIES( src )
+INCLUDE( GNUInstallDirs )
 
 ADD_LIBRARY( ${TARGET} STATIC ${SOURCES} ${HEADERS} )
+
+TARGET_INCLUDE_DIRECTORIES( ${TARGET} PUBLIC
+                            "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>"
+                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" )
 
 IF( BUILD_EXECUTABLE )
 
@@ -71,11 +77,28 @@ IF( BUILD_EXECUTABLE )
 ENDIF()
 
 INSTALL( TARGETS ${TARGET}
+         EXPORT ${TARGET}
          RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
          LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/dll
          ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX} )
 
 INSTALL( FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include )
+
+EXPORT( EXPORT ${TARGET}
+        NAMESPACE "${TARGET}::"
+        FILE "${PROJECT_BINARY_DIR}/${TARGET}Config.cmake" )
+
+INSTALL( EXPORT ${TARGET}
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET}"
+         NAMESPACE "${TARGET}::"
+         FILE "${TARGET}Config.cmake" )
+
+INCLUDE( CMakePackageConfigHelpers )
+WRITE_BASIC_PACKAGE_VERSION_FILE( "${TARGET}ConfigVersion.cmake"
+                                  VERSION ${PROJECT_VERSION}
+                                  COMPATIBILITY SameMajorVersion )
+INSTALL( FILES "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}ConfigVersion.cmake"
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${TARGET}" )
 
 MESSAGE( STATUS "Using ${SSE_FLAGS} extensions")
 MESSAGE( STATUS "C compiler                  = ${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER}" )
