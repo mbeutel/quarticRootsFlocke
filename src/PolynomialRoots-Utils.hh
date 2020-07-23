@@ -42,9 +42,10 @@ namespace PolynomialRoots {
   typedef double valueType;
   typedef int    indexType;
   typedef std::complex<valueType> complexType;
+  typedef long long longIntType;
 
   static int       const bitsValueType = std::numeric_limits<valueType>::digits;
-  static valueType const splitFactor   = (long long(1)<<(bitsValueType-1))+1;
+  static valueType const splitFactor   = (longIntType(1)<<(bitsValueType-1))+1;
 
   /*
   ||         _   _ _
